@@ -70,6 +70,7 @@ internal static class CodesigningMachOExtensions
         var error = await process!.StandardError.ReadToEndAsync();
         await process.WaitForExitAsync();
         
-        return process.ExitCode == 0 && error.Count(c => c.Equals('\n')) == 1;
+        return process.ExitCode == 0 && error.Count(c => c.Equals('\n')) == 1
+            && new FileInfo(outputFilePath).Length > 8;
     }
 }
