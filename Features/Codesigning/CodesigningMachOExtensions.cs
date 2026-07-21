@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text;
 using ivinject.Common.Models;
 using ivinject.Features.Packaging.Models;
 using static ivinject.Features.Packaging.Models.DirectoryNames;
@@ -22,22 +21,23 @@ internal static class CodesigningMachOExtensions
         FileInfo? entitlements = null
     )
     {
-        var arguments = new StringBuilder($"-s {identity}");
-        
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "codesign",
+            ArgumentList = { "-s", identity },
+            RedirectStandardOutput = true
+        };
+
         if (entitlements is not null)
-            arguments.Append($" --entitlements {entitlements.FullName}");
-        
-        arguments.Append($" \"{binary.FullName}\"");
-        
-        using var process = Process.Start(
-            new ProcessStartInfo
-            {
-                FileName = "codesign",
-                Arguments = arguments.ToString(),
-                RedirectStandardOutput = true
-            }
-        );
-        
+        {
+            startInfo.ArgumentList.Add("--entitlements");
+            startInfo.ArgumentList.Add(entitlements.FullName);
+        }
+
+        startInfo.ArgumentList.Add(binary.FullName);
+
+        using var process = Process.Start(startInfo);
+
         await process!.WaitForExitAsync();
         return process.ExitCode == 0;
     }
