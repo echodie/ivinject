@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Cryptography;
 using Claunia.PropertyList;
 using ivinject.Features.Command.Models;
 
@@ -21,18 +22,20 @@ internal static class ProvisioningProfileParser
         var dictionary = (NSDictionary)PropertyListParser.Parse(process.StandardOutput.BaseStream);
         
         var entitlements = (NSDictionary)dictionary["Entitlements"];
-        var teamIdentifier = ((NSString)entitlements["com.apple.developer.team-identifier"]).Content;
         var bundleId = ((NSString)entitlements["application-identifier"]).Content[11..];
-        
+
+        var certificate = ((NSData)((NSArray)dictionary["DeveloperCertificates"])[0]).Bytes;
+        var identity = Convert.ToHexString(SHA1.HashData(certificate));
+
         var entitlementsFile = Path.GetTempFileName();
         File.WriteAllText(entitlementsFile, entitlements.ToXmlPropertyList());
-        
+
         var entitlementsFileInfo = new FileInfo(entitlementsFile);
-        
+
         return new ProfileInfo
         {
             BundleId = bundleId,
-            Identity = teamIdentifier,
+            Identity = identity,
             Entitlements = entitlementsFileInfo
         };
     }
