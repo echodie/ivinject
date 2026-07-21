@@ -203,12 +203,6 @@ internal class InjectionManager(ILogger logger)
 
         var mainBinaryDependencies = await mainBinary.GetSharedLibraries();
 
-        // if (mainBinaryDependencies.All(dependency => !dependency.StartsWith("@rpath")))
-        // {
-        //     await mainBinary.AddRunPath("@executable_path/Frameworks");
-        //     logger.LogInformation("Added Frameworks to {}'s run path", mainBinary.Name);
-        // }
-
         var dependenciesToInsert = _copiedBinaries
             .Where(binary => 
                 binary.Type is IviInjectionEntryType.DynamicLibrary or IviInjectionEntryType.Framework

@@ -43,24 +43,6 @@ internal static class DependencyExtensions
         await process!.WaitForExitAsync();
     }
     
-    internal static async Task<bool> AddRunPath(
-        this IviMachOBinary binary,
-        string rPath
-    )
-    {
-        using var process = Process.Start(
-            new ProcessStartInfo
-            {
-                FileName = "install_name_tool",
-                ArgumentList = { "-add_rpath", rPath, binary.FullName },
-                RedirectStandardOutput = true
-            }
-        );
-            
-        await process!.WaitForExitAsync();
-        return process.ExitCode == 0;
-    }
-    
     internal static async Task InsertDependency(
         this IviMachOBinary binary,
         string dependency
